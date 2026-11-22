@@ -41,17 +41,25 @@ export const Route = createFileRoute("/track")({
 function rowToTicket(row: TicketRow): Ticket {
   const status = (row.status ?? "Open") as Ticket["status"];
   const category = (row.category ?? "Other") as Ticket["category"];
+  const department = row.routed_to ?? row.department ?? "—";
+  const isEscalated = Boolean(
+    row.escalated ||
+    row.escalation_status === "Escalated" ||
+    status === "Escalated"
+  );
+  const createdAt = row.created_at ?? row.raised_at ?? new Date().toISOString();
+  const updatedAt = row.updated_at ?? createdAt;
 
   const timeline: TimelineEvent[] = [
-    { label: "Ticket submitted",       detail: "Received from student portal",      at: row.created_at, done: true },
-    { label: "AI analysis",            detail: "Message parsed and classified",      at: row.created_at, done: true },
-    { label: "Category & urgency",     detail: `Classified as ${category}`,          at: row.created_at, done: true },
-    { label: "Routed to department",   detail: `Assigned to ${row.department ?? "—"}`, at: row.created_at, done: status !== "Open" },
-    { label: status === "Escalated" ? "Escalated" : "In progress",
-      detail: status === "Escalated" ? "SLA breached — escalated to department head" : "Handled by assigned team",
-      at: row.created_at,
-      done: status === "In Progress" || status === "Escalated" || status === "Resolved" },
-    { label: "Resolved", detail: "Ticket closed", at: row.created_at, done: status === "Resolved" },
+    { label: "Ticket submitted",       detail: "Received from student portal",      at: createdAt, done: true },
+    { label: "AI analysis",            detail: "Message parsed and classified",      at: createdAt, done: true },
+    { label: "Category & urgency",     detail: `Classified as ${category}`,          at: createdAt, done: true },
+    { label: "Routed to department",   detail: `Assigned to ${department}`,          at: createdAt, done: status !== "Open" },
+    { label: isEscalated ? "Escalated" : "In progress",
+      detail: isEscalated ? "SLA breached — escalated to department head" : "Handled by assigned team",
+      at: createdAt,
+      done: status === "In Progress" || isEscalated || status === "Resolved" },
+    { label: "Resolved", detail: "Ticket closed", at: updatedAt, done: status === "Resolved" },
   ];
 
   return {
@@ -62,11 +70,11 @@ function rowToTicket(row: TicketRow): Ticket {
     category,
     urgency: (row.urgency ?? "Low") as Ticket["urgency"],
     status,
-    department: row.department ?? "—",
-    escalated: row.escalated ?? status === "Escalated",
+    department,
+    escalated: isEscalated,
     confidence: row.confidence ?? 0,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at ?? row.created_at,
+    createdAt,
+    updatedAt,
     timeline,
   };
 }

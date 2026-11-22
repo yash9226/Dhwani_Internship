@@ -14,17 +14,20 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // ─── Row type matching the n8n → Supabase tickets table ──────────────────────
 export type TicketRow = {
   id: number;
-  ticket_id: string;        // e.g. TKT-WIXU53
+  ticket_id: string;        // e.g. TKT-HWLGM5
   sender: string;
   message: string;
   contact: string | null;
   status: string;           // Open | In Progress | Escalated | Resolved
   category: string;         // Academic | Technical | Administrative | Facilities | Other
   urgency: string;          // Low | Medium | High
-  department: string;
-  confidence: number | null;
-  escalated: boolean | null;
-  source: string | null;
-  created_at: string;
-  updated_at: string | null;
+  department?: string | null;
+  routed_to?: string | null;
+  confidence?: number | null;
+  escalated?: boolean | null;
+  escalation_status?: string | null;
+  source?: string | null;
+  created_at?: string | null;
+  raised_at?: string | null;
+  updated_at?: string | null;
 };
