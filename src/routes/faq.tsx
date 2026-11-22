@@ -14,16 +14,16 @@ import { faqs } from "@/lib/mock-data";
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "FAQ — CMPICA AI Helpdesk" },
+      { title: "FAQ — University AI Helpdesk" },
       {
         name: "description",
         content:
-          "Answers about ticket categories, urgency levels, escalation rules, tracking and language support in the CMPICA AI Helpdesk.",
+          "Answers about ticket categories, urgency levels, escalation rules, tracking and language support in the University AI Helpdesk.",
       },
-      { property: "og:title", content: "FAQ — CMPICA AI Helpdesk" },
+      { property: "og:title", content: "FAQ — University AI Helpdesk" },
       {
         property: "og:description",
-        content: "Common questions about the AI-powered student support system at CMPICA.",
+        content: "Common questions about the AI-powered student support system at the University.",
       },
     ],
   }),

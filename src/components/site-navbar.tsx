@@ -27,7 +27,7 @@ export function SiteNavbar() {
             <Sparkles className="h-4.5 w-4.5 text-white" strokeWidth={2.2} />
           </span>
           <span className="truncate text-[15px] font-semibold tracking-tight">
-            CMPICA <span className="text-gradient">AI Helpdesk</span>
+            University <span className="text-gradient">AI Helpdesk</span>
           </span>
         </Link>
 

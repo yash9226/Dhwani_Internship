@@ -10,11 +10,10 @@ export function SiteFooter() {
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-brand">
               <Sparkles className="h-4.5 w-4.5 text-white" strokeWidth={2.2} />
             </span>
-            <span className="text-[15px] font-semibold tracking-tight">CMPICA AI Helpdesk</span>
+            <span className="text-[15px] font-semibold tracking-tight">University AI Helpdesk</span>
           </div>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
-            AI-Powered Student Support System — built for the n8n Community Hackathon at CMPICA,
-            CHARUSAT.
+            AI-Powered Student Support System — built for the n8n Community Hackathon at CHARUSAT University.
           </p>
           <div className="mt-5 flex gap-2">
             {[Github, Twitter, Linkedin].map((Icon, i) => (
@@ -31,9 +30,9 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold">CMPICA</h3>
+          <h3 className="text-sm font-semibold">University</h3>
           <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
-            <li>Smt. Chandaben Mohanbhai Patel Institute of Computer Applications</li>
+            <li>Institute of Computer Applications</li>
             <li>Departments &amp; Programmes</li>
             <li>Student Life</li>
             <li>Placements</li>
@@ -76,7 +75,7 @@ export function SiteFooter() {
           </ul>
           <ul className="mt-5 space-y-2.5 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
-              <Mail className="h-4 w-4 shrink-0" /> helpdesk@cmpica.charusat.ac.in
+              <Mail className="h-4 w-4 shrink-0" /> helpdesk@charusat.ac.in
             </li>
             <li className="flex items-center gap-2">
               <Phone className="h-4 w-4 shrink-0" /> +91 2697 265 011
@@ -89,7 +88,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-border/60">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p>© 2026 CMPICA AI Helpdesk. Demonstration interface with mock data.</p>
+          <p>© 2026 University AI Helpdesk. Demonstration interface with mock data.</p>
           <p>n8n Community Hackathon · CHARUSAT</p>
         </div>
       </div>

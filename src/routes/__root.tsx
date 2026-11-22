@@ -83,17 +83,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CMPICA AI Helpdesk — AI-Powered Student Support System" },
+      { title: "University AI Helpdesk — AI-Powered Student Support System" },
       {
         name: "description",
         content:
-          "Smart ticket management powered by artificial intelligence for CMPICA, CHARUSAT students and administrators.",
+          "Smart ticket management powered by artificial intelligence for University students and administrators.",
       },
-      { name: "author", content: "CMPICA, CHARUSAT" },
-      { property: "og:title", content: "CMPICA AI Helpdesk" },
+      { name: "author", content: "CHARUSAT University" },
+      { property: "og:title", content: "University AI Helpdesk" },
       {
         property: "og:description",
-        content: "AI-Powered Student Support System for CMPICA, CHARUSAT.",
+        content: "AI-Powered Student Support System for CHARUSAT University.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -35,13 +35,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/demo")({
   head: () => ({
     meta: [
-      { title: "Live Judge Demonstration — CMPICA AI Helpdesk" },
+      { title: "Live Judge Demonstration — University AI Helpdesk" },
       {
         name: "description",
         content:
-          "Watch a student ticket get classified, prioritised, routed and tracked in real time — the full CMPICA AI Helpdesk pipeline in one screen.",
+          "Watch a student ticket get classified, prioritised, routed and tracked in real time — the full University AI Helpdesk pipeline in one screen.",
       },
-      { property: "og:title", content: "Live Judge Demonstration — CMPICA AI Helpdesk" },
+      { property: "og:title", content: "Live Judge Demonstration — University AI Helpdesk" },
       {
         property: "og:description",
         content: "Real-time classification, urgency prediction and routing visualisation.",

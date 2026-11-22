@@ -63,13 +63,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Administrator Dashboard — CMPICA AI Helpdesk" },
+      { title: "Administrator Dashboard — University AI Helpdesk" },
       {
         name: "description",
         content:
-          "Monitor, filter and triage student tickets: live queue, escalations, activity feed and analytics for the CMPICA AI Helpdesk.",
+          "Monitor, filter and triage student tickets: live queue, escalations, activity feed and analytics for the University AI Helpdesk.",
       },
-      { property: "og:title", content: "Administrator Dashboard — CMPICA AI Helpdesk" },
+      { property: "og:title", content: "Administrator Dashboard — University AI Helpdesk" },
       {
         property: "og:description",
         content: "Operational view of student support tickets, escalations and analytics.",
@@ -235,7 +235,7 @@ function DashboardPage() {
               )}
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Live queue across all CMPICA departments
+              Live queue across all University departments
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">

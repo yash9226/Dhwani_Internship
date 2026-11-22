@@ -21,16 +21,16 @@ export const Route = createFileRoute("/track")({
   }),
   head: () => ({
     meta: [
-      { title: "Track a Ticket — CMPICA AI Helpdesk" },
+      { title: "Track a Ticket — University AI Helpdesk" },
       {
         name: "description",
         content:
           "Enter your ticket ID to follow its live status timeline: category, urgency, routing department and escalation state.",
       },
-      { property: "og:title", content: "Track a Ticket — CMPICA AI Helpdesk" },
+      { property: "og:title", content: "Track a Ticket — University AI Helpdesk" },
       {
         property: "og:description",
-        content: "Follow your CMPICA support request from submission to resolution.",
+        content: "Follow your University support request from submission to resolution.",
       },
     ],
   }),

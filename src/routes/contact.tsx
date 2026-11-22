@@ -14,16 +14,16 @@ import { Textarea } from "@/components/ui/textarea";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — CMPICA AI Helpdesk" },
+      { title: "Contact — University AI Helpdesk" },
       {
         name: "description",
         content:
-          "Reach the CMPICA AI Helpdesk team at CHARUSAT, Changa: email, phone, office hours and campus location.",
+          "Reach the University AI Helpdesk team at CHARUSAT, Changa: email, phone, office hours and campus location.",
       },
-      { property: "og:title", content: "Contact — CMPICA AI Helpdesk" },
+      { property: "og:title", content: "Contact — University AI Helpdesk" },
       {
         property: "og:description",
-        content: "Get in touch with the CMPICA AI Helpdesk team at CHARUSAT.",
+        content: "Get in touch with the University AI Helpdesk team at CHARUSAT.",
       },
     ],
   }),
@@ -31,9 +31,9 @@ export const Route = createFileRoute("/contact")({
 });
 
 const details = [
-  { icon: Mail, label: "Email", value: "helpdesk@cmpica.charusat.ac.in" },
+  { icon: Mail, label: "Email", value: "helpdesk@charusat.ac.in" },
   { icon: Phone, label: "Phone", value: "+91 2697 265 011" },
-  { icon: MapPin, label: "Campus", value: "CMPICA, CHARUSAT, Changa, Anand, Gujarat 388421" },
+  { icon: MapPin, label: "Campus", value: "CHARUSAT University, Changa, Anand, Gujarat 388421" },
   { icon: Clock, label: "Helpdesk hours", value: "Monday – Saturday, 9:00 AM – 5:30 PM IST" },
 ];
 
@@ -47,7 +47,7 @@ function ContactPage() {
         <PageHeader
           eyebrow="Contact"
           title="Talk to the helpdesk team"
-          sub="For anything the AI cannot resolve, a human at CMPICA is one message away."
+          sub="For anything the AI cannot resolve, a human at the University is one message away."
         />
 
         <div className="mt-12 grid gap-6 lg:grid-cols-[1fr_1.2fr]">

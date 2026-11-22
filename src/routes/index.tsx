@@ -34,17 +34,17 @@ import { faqs, stats } from "@/lib/mock-data";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CMPICA AI Helpdesk — AI-Powered Student Support System" },
+      { title: "University AI Helpdesk — AI-Powered Student Support System" },
       {
         name: "description",
         content:
-          "Smart ticket management powered by artificial intelligence. Submit, classify, route and track student support requests at CMPICA, CHARUSAT.",
+          "Smart ticket management powered by artificial intelligence. Submit, classify, route and track student support requests at CHARUSAT University.",
       },
-      { property: "og:title", content: "CMPICA AI Helpdesk — AI-Powered Student Support" },
+      { property: "og:title", content: "University AI Helpdesk — AI-Powered Student Support" },
       {
         property: "og:description",
         content:
-          "Smart ticket management powered by artificial intelligence for CMPICA students and administrators.",
+          "Smart ticket management powered by artificial intelligence for University students and administrators.",
       },
     ],
   }),
@@ -100,7 +100,7 @@ function Landing() {
             <motion.div variants={fadeUp} className="mb-6 flex justify-center">
               <span className="inline-flex items-center gap-2 rounded-full border border-border/70 glass px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
                 <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                Built for the n8n Community Hackathon · CMPICA, CHARUSAT
+                Built for the n8n Community Hackathon · CHARUSAT University
               </span>
             </motion.div>
             <motion.h1

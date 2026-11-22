@@ -27,13 +27,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/submit")({
   head: () => ({
     meta: [
-      { title: "Submit a Ticket — CMPICA AI Helpdesk" },
+      { title: "Submit a Ticket — University AI Helpdesk" },
       {
         name: "description",
         content:
-          "Describe your issue in one message. The AI helpdesk classifies, prioritises and routes it to the right CMPICA department automatically.",
+          "Describe your issue in one message. The AI helpdesk classifies, prioritises and routes it to the right University department automatically.",
       },
-      { property: "og:title", content: "Submit a Ticket — CMPICA AI Helpdesk" },
+      { property: "og:title", content: "Submit a Ticket — University AI Helpdesk" },
       {
         property: "og:description",
         content: "Raise a student support request and let AI route it to the right department.",
