@@ -12,8 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CategoryBadge, StatusBadge, UrgencyBadge } from "@/components/badges";
 import { TicketTimeline } from "@/components/ticket-timeline";
-import { tickets, type Ticket, type TimelineEvent } from "@/lib/mock-data";
-import { supabase, type TicketRow } from "@/lib/supabase";
+import { tickets, type Ticket } from "@/lib/mock-data";
+import { supabase, rowToTicket, type TicketRow } from "@/lib/supabase";
 
 export const Route = createFileRoute("/track")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -36,48 +36,6 @@ export const Route = createFileRoute("/track")({
   }),
   component: TrackPage,
 });
-
-// ─── Map Supabase row → UI Ticket type ───────────────────────────────────────
-function rowToTicket(row: TicketRow): Ticket {
-  const status = (row.status ?? "Open") as Ticket["status"];
-  const category = (row.category ?? "Other") as Ticket["category"];
-  const department = row.routed_to ?? row.department ?? "—";
-  const isEscalated = Boolean(
-    row.escalated ||
-    row.escalation_status === "Escalated" ||
-    status === "Escalated"
-  );
-  const createdAt = row.created_at ?? row.raised_at ?? new Date().toISOString();
-  const updatedAt = row.updated_at ?? createdAt;
-
-  const timeline: TimelineEvent[] = [
-    { label: "Ticket submitted",       detail: "Received from student portal",      at: createdAt, done: true },
-    { label: "AI analysis",            detail: "Message parsed and classified",      at: createdAt, done: true },
-    { label: "Category & urgency",     detail: `Classified as ${category}`,          at: createdAt, done: true },
-    { label: "Routed to department",   detail: `Assigned to ${department}`,          at: createdAt, done: status !== "Open" },
-    { label: isEscalated ? "Escalated" : "In progress",
-      detail: isEscalated ? "SLA breached — escalated to department head" : "Handled by assigned team",
-      at: createdAt,
-      done: status === "In Progress" || isEscalated || status === "Resolved" },
-    { label: "Resolved", detail: "Ticket closed", at: updatedAt, done: status === "Resolved" },
-  ];
-
-  return {
-    id: row.ticket_id,
-    sender: row.sender,
-    contact: row.contact ?? undefined,
-    message: row.message,
-    category,
-    urgency: (row.urgency ?? "Low") as Ticket["urgency"],
-    status,
-    department,
-    escalated: isEscalated,
-    confidence: row.confidence ?? 0,
-    createdAt,
-    updatedAt,
-    timeline,
-  };
-}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 function TrackPage() {

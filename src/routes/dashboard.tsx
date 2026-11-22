@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -10,6 +10,8 @@ import {
   Copy,
   Inbox,
   LayoutGrid,
+  Loader2,
+  RefreshCw,
   Search,
   Settings,
   Sparkles,
@@ -50,11 +52,12 @@ import {
   CATEGORIES,
   STATUSES,
   URGENCIES,
-  activity,
-  stats,
-  tickets,
+  activity as mockActivity,
+  stats as mockStats,
+  tickets as mockTickets,
   type Ticket,
 } from "@/lib/mock-data";
+import { supabase, rowToTicket, type TicketRow } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard")({
@@ -83,14 +86,6 @@ const navItems = [
   { id: "analytics", label: "Analytics", icon: BarChart3 },
 ];
 
-const statCards = [
-  { label: "Total Tickets", value: stats.total.toLocaleString(), delta: "+8.2%", icon: Inbox },
-  { label: "Open Tickets", value: stats.open, delta: "-4.1%", icon: Timer },
-  { label: "Resolved Tickets", value: stats.resolved.toLocaleString(), delta: "+11.7%", icon: CheckCircle2 },
-  { label: "Escalated Tickets", value: stats.escalated, delta: "-12.0%", icon: AlertTriangle },
-  { label: "Avg. Response Time", value: stats.avgResponse, delta: "-18.4%", icon: TrendingUp },
-];
-
 function DashboardPage() {
   const [tab, setTab] = useState("overview");
   const [query, setQuery] = useState("");
@@ -99,9 +94,83 @@ function DashboardPage() {
   const [status, setStatus] = useState("all");
   const [selected, setSelected] = useState<Ticket | null>(null);
 
+  // Live Supabase tickets state
+  const [supabaseTickets, setSupabaseTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [includeMock, setIncludeMock] = useState(false);
+
+  const fetchTickets = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("tickets")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.warn("Error fetching Supabase tickets:", error);
+      } else if (data) {
+        const mapped = data.map((r) => rowToTicket(r as TicketRow));
+        setSupabaseTickets(mapped);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch tickets from Supabase:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTickets();
+
+    // Subscribe to realtime Postgres changes
+    const channel = supabase
+      .channel("dashboard-tickets-sync")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "tickets" },
+        () => {
+          fetchTickets();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchTickets]);
+
+  // Combined or pure Supabase tickets
+  const activeTickets = useMemo(() => {
+    if (includeMock) {
+      const existing = new Set(supabaseTickets.map((t) => t.id.toUpperCase()));
+      return [...supabaseTickets, ...mockTickets.filter((t) => !existing.has(t.id.toUpperCase()))];
+    }
+    return supabaseTickets.length > 0 ? supabaseTickets : mockTickets;
+  }, [supabaseTickets, includeMock]);
+
+  // Dynamic stat cards calculated from real data
+  const statCards = useMemo(() => {
+    const total = activeTickets.length;
+    const open = activeTickets.filter((t) => t.status === "Open").length;
+    const inProgress = activeTickets.filter((t) => t.status === "In Progress").length;
+    const resolved = activeTickets.filter((t) => t.status === "Resolved").length;
+    const escalated = activeTickets.filter((t) => t.escalated || t.status === "Escalated").length;
+
+    const isLive = supabaseTickets.length > 0;
+
+    return [
+      { label: "Total Tickets", value: total.toLocaleString(), delta: isLive ? "Live" : "+8.2%", icon: Inbox },
+      { label: "Open Tickets", value: open.toString(), delta: `${open} pending`, icon: Timer },
+      { label: "In Progress", value: inProgress.toString(), delta: `${inProgress} active`, icon: TrendingUp },
+      { label: "Resolved Tickets", value: resolved.toLocaleString(), delta: `${resolved} closed`, icon: CheckCircle2 },
+      { label: "Escalated Tickets", value: escalated.toString(), delta: `${escalated} breached`, icon: AlertTriangle },
+    ];
+  }, [activeTickets, supabaseTickets]);
+
   const filtered = useMemo(
     () =>
-      tickets.filter(
+      activeTickets.filter(
         (t) =>
           (category === "all" || t.category === category) &&
           (urgency === "all" || t.urgency === urgency) &&
@@ -109,10 +178,10 @@ function DashboardPage() {
           (query.trim() === "" ||
             `${t.id} ${t.sender} ${t.message}`.toLowerCase().includes(query.toLowerCase())),
       ),
-    [query, category, urgency, status],
+    [activeTickets, query, category, urgency, status],
   );
 
-  const escalations = tickets.filter((t) => t.escalated);
+  const escalations = activeTickets.filter((t) => t.escalated || t.status === "Escalated");
 
   return (
     <div className="mx-auto flex max-w-[110rem] gap-6 px-4 py-8 sm:px-6">
@@ -145,7 +214,7 @@ function DashboardPage() {
           <CardContent className="p-5">
             <Sparkles className="h-5 w-5" />
             <p className="mt-3 text-sm font-medium">AI classification accuracy</p>
-            <p className="mt-1 text-2xl font-semibold">{stats.accuracy}</p>
+            <p className="mt-1 text-2xl font-semibold">96.4%</p>
           </CardContent>
         </Card>
       </aside>
@@ -153,15 +222,46 @@ function DashboardPage() {
       <div className="min-w-0 flex-1">
         <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:flex sm:justify-between">
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-semibold tracking-tight">Administrator Dashboard</h1>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="truncate text-2xl font-semibold tracking-tight">Administrator Dashboard</h1>
+              {supabaseTickets.length > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-0.5 text-xs font-medium text-success">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75"></span>
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-success"></span>
+                  </span>
+                  Supabase Live ({supabaseTickets.length})
+                </span>
+              )}
+            </div>
             <p className="mt-1 text-sm text-muted-foreground">
               Live queue across all CMPICA departments
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchTickets}
+              disabled={loading}
+              className="rounded-full gap-1.5"
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+              Refresh
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIncludeMock((v) => !v)}
+              className="rounded-full text-xs"
+            >
+              {includeMock ? "Hide Mock Data" : "Include Mock Data"}
+            </Button>
             <Button variant="outline" size="icon" aria-label="Notifications" className="relative rounded-full">
               <Bell className="h-4 w-4" />
-              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-danger" />
+              {escalations.length > 0 && (
+                <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-danger" />
+              )}
             </Button>
             <Button className="rounded-full bg-gradient-brand text-white shadow-elegant">
               Export report
@@ -213,7 +313,7 @@ function DashboardPage() {
               <div className="lg:col-span-2">
                 <VolumeLineChart />
               </div>
-              <ActivityPanel />
+              <ActivityPanel liveTickets={activeTickets} />
             </div>
           </TabsContent>
 
@@ -242,7 +342,7 @@ function DashboardPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-28">Ticket</TableHead>
+                      <TableHead className="w-32">Ticket</TableHead>
                       <TableHead className="min-w-[16rem]">Message</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Urgency</TableHead>
@@ -257,7 +357,7 @@ function DashboardPage() {
                         onClick={() => setSelected(t)}
                         className="cursor-pointer"
                       >
-                        <TableCell className="font-mono text-xs">{t.id}</TableCell>
+                        <TableCell className="font-mono text-xs font-semibold">{t.id}</TableCell>
                         <TableCell>
                           <p className="max-w-md truncate text-sm">{t.message}</p>
                           <p className="text-xs text-muted-foreground">{t.sender}</p>
@@ -271,7 +371,14 @@ function DashboardPage() {
                     {filtered.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={6} className="py-12 text-center text-sm text-muted-foreground">
-                          No tickets match these filters.
+                          {loading ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                              Loading tickets from Supabase…
+                            </span>
+                          ) : (
+                            "No tickets match these filters."
+                          )}
                         </TableCell>
                       </TableRow>
                     )}
@@ -308,9 +415,14 @@ function DashboardPage() {
                     </div>
                   </button>
                 ))}
+                {escalations.length === 0 && (
+                  <p className="col-span-2 py-8 text-center text-sm text-muted-foreground">
+                    No escalated tickets right now. All tickets are within SLA.
+                  </p>
+                )}
               </CardContent>
             </Card>
-            <ActivityPanel />
+            <ActivityPanel liveTickets={activeTickets} />
           </TabsContent>
 
           {/* Analytics */}
@@ -428,7 +540,31 @@ const icons: Record<string, typeof Activity> = {
   new: Inbox,
 };
 
-export function ActivityPanel() {
+export function ActivityPanel({ liveTickets }: { liveTickets?: Ticket[] }) {
+  const displayActivity = useMemo(() => {
+    if (liveTickets && liveTickets.length > 0) {
+      return liveTickets.slice(0, 6).map((t) => {
+        let type: "escalation" | "resolved" | "routing" | "new" = "new";
+        if (t.escalated || t.status === "Escalated") type = "escalation";
+        else if (t.status === "Resolved") type = "resolved";
+        else if (t.status === "In Progress") type = "routing";
+
+        const date = new Date(t.createdAt);
+        const timeStr = isNaN(date.getTime())
+          ? "Recently"
+          : date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+        return {
+          id: t.id,
+          type,
+          text: `${t.id} (${t.sender}) · ${t.status} · ${t.department}`,
+          time: timeStr,
+        };
+      });
+    }
+    return mockActivity;
+  }, [liveTickets]);
+
   return (
     <Card className="rounded-2xl border-border/60 shadow-soft">
       <CardHeader>
@@ -437,7 +573,7 @@ export function ActivityPanel() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {activity.map((a, i) => {
+        {displayActivity.map((a, i) => {
           const Icon = icons[a.type] ?? Activity;
           return (
             <motion.div
