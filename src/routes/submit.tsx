@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
-import { CheckCircle2, Clock, Info, Loader2, Send, Sparkles, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Info, Loader2, Search, Send, Sparkles, XCircle } from "lucide-react";
 
 import { AuroraBackground } from "@/components/aurora-background";
 import { PageHeader } from "@/components/section-heading";
@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CategoryBadge, UrgencyBadge } from "@/components/badges";
-import { classifyMock } from "@/lib/mock-data";
+import { classifyMock, type Ticket } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/submit")({
@@ -116,6 +116,37 @@ function SubmitPage() {
       }
 
       setTicketId(id);
+
+      // Cache ticket locally so it can immediately be tracked on /track
+      try {
+        const localTicket: Ticket = {
+          id,
+          sender: name.trim(),
+          contact: contact.trim() || undefined,
+          message: message.trim(),
+          category: preview.category,
+          urgency: preview.urgency,
+          status: "Open",
+          department: preview.department,
+          escalated: false,
+          confidence: preview.confidence,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          timeline: [
+            { label: "Ticket submitted", detail: "Received from student portal", at: new Date().toISOString(), done: true },
+            { label: "AI analysis", detail: "Message parsed and classified", at: new Date().toISOString(), done: true },
+            { label: "Category & urgency assigned", detail: `Classified as ${preview.category}`, at: new Date().toISOString(), done: true },
+            { label: "Routed to department", detail: `Assigned to ${preview.department}`, at: new Date().toISOString(), done: false },
+            { label: "In progress", detail: "Handled by assigned team", at: new Date().toISOString(), done: false },
+            { label: "Resolved", detail: "Ticket closed", at: new Date().toISOString(), done: false },
+          ],
+        };
+        const prev = JSON.parse(localStorage.getItem("cmpica_tickets") || "[]") as Ticket[];
+        localStorage.setItem("cmpica_tickets", JSON.stringify([localTicket, ...prev.filter((t) => t.id !== id)]));
+      } catch (e) {
+        console.warn("Could not cache ticket locally:", e);
+      }
+
       toast.success("Ticket submitted", {
         description: `Reference ${id} · routed to ${preview.department}`,
       });
@@ -178,9 +209,17 @@ function SubmitPage() {
                     <p className="mt-4 text-sm text-muted-foreground">
                       Routed to <span className="text-foreground">{preview.department}</span>
                     </p>
-                    <Button onClick={reset} variant="outline" className="mt-7 rounded-full">
-                      Submit another ticket
-                    </Button>
+                    <div className="mt-7 flex flex-wrap justify-center gap-3">
+                      <Button asChild className="rounded-full bg-gradient-brand px-6 text-white shadow-elegant hover:opacity-95">
+                        <Link to="/track" search={{ id: ticketId }}>
+                          <Search className="mr-2 h-4 w-4" />
+                          Track this ticket
+                        </Link>
+                      </Button>
+                      <Button onClick={reset} variant="outline" className="rounded-full">
+                        Submit another ticket
+                      </Button>
+                    </div>
                   </motion.div>
                 ) : (
                   <motion.form
